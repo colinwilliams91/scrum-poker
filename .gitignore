@@ -1,3 +1,6 @@
+# Keys
+*.pem
+
 # Logs
 logs
 *.log
