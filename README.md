@@ -22,3 +22,6 @@ This is an application that integrates with GitHub Projects for seamless import 
 - [Update the webhook URL](https://docs.github.com/en/apps/creating-github-apps/writing-code-for-a-github-app/building-a-github-app-that-responds-to-webhook-events#update-the-webhook-url)
   - Once you have a server that is set up to receive webhook traffic from GitHub, update the webhook URL in your app settings. You should not use Smee.io to forward your webhooks in production.
   - [Share on marketplace](https://docs.github.com/en/apps/creating-github-apps/writing-code-for-a-github-app/building-a-github-app-that-responds-to-webhook-events#share-your-app)
+
+  ## Draw.io
+  - [GH/App communication and User Input](https://app.diagrams.net/?libs=general;flowchart#Hcolinwilliams91%2Fscrum-poker%2Fmain%2Fgh-integrations-chart.drawio.html)
