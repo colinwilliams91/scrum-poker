@@ -1,0 +1,19 @@
+{
+  "name": "scrum-poker",
+  "version": "1.0.0",
+  "description": "This is an application that integrates with GitHub Projects for seamless import of product backlogs into a UI for easy sprint estimation.",
+  "main": "index.js",
+  "scripts": {
+    "server": "node ./app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.1",
+    "octokit": "^3.1.2"
+  },
+  "devDependencies": {
+    "smee-client": "^2.0.1"
+  }
+}
