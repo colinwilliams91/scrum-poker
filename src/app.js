@@ -50,3 +50,10 @@ const path = process.env.WEBHOOK_PATH;
 
 /* Condense All Server Octokit Instance Middleware */
 const middleware = createNodeMiddleware(app);
+
+http
+  .createServer(middleware)
+  .listen(port, () => {
+    console.log(`Server is listening for events at: ${host}:${port}`);
+    console.log("Press Ctrl + C to quit.");
+  });
