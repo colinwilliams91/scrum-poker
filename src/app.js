@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import { App, createNodeMiddleware  } from "octokit";
 import http from "http";
+import util from "util";
 
 dotenv.config();
 
@@ -19,6 +20,15 @@ const app = new App({
   },
 });
 
+const { data } = await app.octokit.request("GET /app");
+console.log("unformatted:", data);
+console.log(JSON.stringify(data, null, 2));
+console.log(util.inspect(data, { depth: null }));
+
+app.webhooks.onAny(({ id, name, payload }) => {
+  console.log(name, "event received");
+});
+
 // TODO: Add a repo to the application watched repositories to GET backlog
 
 // app.oauth.on("token", async ({ token, octokit }) => {
@@ -32,3 +42,11 @@ const app = new App({
 //   repo: "docs",
 //   per_page: 2
 // });
+
+/* Server Setup */
+const port = process.env.PORT;
+const host = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
+const path = process.env.WEBHOOK_PATH;
+
+/* Condense All Server Octokit Instance Middleware */
+const middleware = createNodeMiddleware(app);
