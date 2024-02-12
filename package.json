@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "This is an application that integrates with GitHub Projects for seamless import of product backlogs into a UI for easy sprint estimation.",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "server": "node ./app.js"
   },
