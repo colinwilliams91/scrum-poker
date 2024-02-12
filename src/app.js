@@ -25,3 +25,10 @@ const app = new App({
 //   const { data } = await octokit.request("GET /user");
 //   console.log(`Token retrieved for ${data.login}`);
 // });
+
+// TODO: test GET backlog from specific repository
+// await octokit.request("GET /repos/{owner}/{repo}/issues", {
+//   owner: "github",
+//   repo: "docs",
+//   per_page: 2
+// });
