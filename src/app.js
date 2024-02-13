@@ -20,7 +20,9 @@ const app = new App({
   },
 });
 
+// TODO: JWT for GH/Octokit
 const { data } = await app.octokit.request("GET /app");
+
 console.log("unformatted:", data);
 console.log(JSON.stringify(data, null, 2));
 console.log(util.inspect(data, { depth: null }));
@@ -31,10 +33,12 @@ app.webhooks.onAny(({ id, name, payload }) => {
 
 // TODO: Add a repo to the application watched repositories to GET backlog
 
-// app.oauth.on("token", async ({ token, octokit }) => {
-//   const { data } = await octokit.request("GET /user");
-//   console.log(`Token retrieved for ${data.login}`);
-// });
+app.oauth.on("token", async ({ token, octokit }) => {
+  // TODO: this octokit.authenticate should be in the parent scope so it is more available
+  octokit.authenticate({ type: 'token', token: installation.data.token })
+  const { data } = await octokit.request("GET /user");
+  console.log(`Token retrieved for ${data.login}`);
+});
 
 // TODO: test GET backlog from specific repository
 // await octokit.request("GET /repos/{owner}/{repo}/issues", {
@@ -42,6 +46,21 @@ app.webhooks.onAny(({ id, name, payload }) => {
 //   repo: "docs",
 //   per_page: 2
 // });
+
+
+// TODO: this is an ex Octokit App constructor passing OAuth
+// const app = new App({
+//   appId: 123,
+//   privateKey: "-----BEGIN PRIVATE KEY-----\n...",
+//   oauth: {
+//     clientId: "0123",
+//     clientSecret: "0123secret",
+//   },
+//   webhooks: {
+//     secret: "secret",
+//   },
+// });
+
 
 /* Server Setup */
 const port = process.env.PORT;
