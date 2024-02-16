@@ -1,7 +1,10 @@
 import dotenv from "dotenv";
-import { App, createNodeMiddleware  } from "octokit";
+import { Octokit, App } from "octokit";
+import { createNodeMiddleware } from "@octokit/webhooks";
+import { createAppAuth } from "@octokit/auth-app";
 import http from "http";
 import util from "util";
+import fs from "fs";
 
 dotenv.config();
 
@@ -11,34 +14,47 @@ const privateKey = Buffer
   .from(process.env.PRIVATE_KEY, "base64")
   .toString("ascii");
 
+// const privateKeyPath = process.env.PRIVATE_KEY_PATH;
+// const privateKey = fs.readFileSync(privateKeyPath, "utf-8");
+
+// TODO: Make a JWT (find a package for node)
+// [ex Ruby](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app#example-using-ruby-to-generate-a-jwt)
+
 /* Octokit App Class */
 const app = new App({
   appId: appId,
   privateKey: privateKey,
+  authStrategy: createAppAuth,
+  auth: { appId, privateKey },
   webhooks: {
     secret: webhookSecret
   },
 });
 
+// const appOctokit = new Octokit({
+//   authStrategy: createAppAuth,
+//   auth: { appId, privateKey }
+// });
+
 // TODO: JWT for GH/Octokit
-const { data } = await app.octokit.request("GET /app");
+// const { data } = await app.octokit.request("/app");
 
-console.log("unformatted:", data);
-console.log(JSON.stringify(data, null, 2));
-console.log(util.inspect(data, { depth: null }));
+// console.log("unformatted:", data);
+// console.log(JSON.stringify(data, null, 2));
+// console.log(util.inspect(data, { depth: null }));
 
-app.webhooks.onAny(({ id, name, payload }) => {
-  console.log(name, "event received");
-});
+// app.webhooks.onAny(({ id, name, payload }) => {
+//   console.log(name, "event received");
+// });
 
 // TODO: Add a repo to the application watched repositories to GET backlog
 
-app.oauth.on("token", async ({ token, octokit }) => {
-  // TODO: this octokit.authenticate should be in the parent scope so it is more available
-  octokit.authenticate({ type: 'token', token: installation.data.token })
-  const { data } = await octokit.request("GET /user");
-  console.log(`Token retrieved for ${data.login}`);
-});
+// app.oauth.on("token", async ({ token, octokit }) => {
+//   // TODO: this octokit.authenticate should be in the parent scope so it is more available
+//   octokit.authenticate({ type: 'token', token: installation.data.token })
+//   const { data } = await octokit.request("GET /user");
+//   console.log(`Token retrieved for ${data.login}`);
+// });
 
 // TODO: test GET backlog from specific repository
 // await octokit.request("GET /repos/{owner}/{repo}/issues", {
