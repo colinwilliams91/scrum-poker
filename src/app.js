@@ -49,10 +49,10 @@ const app = new App({
   },
 });
 
-// Octokit from SDK method for installation id
+/* _OCTOKIT_FROM_SDK_METHOD_FOR_INSTALLATION_ID_*/
 // const octokit = await app.getInstallationOctokit("Iv1.e264e30f233d7489");
 
-
+/* _APP_OCTOKIT_AUTH_INIT_NO_JWT_ */
 // const appOctokit = new Octokit({
 //   authStrategy: createAppAuth,
 //   auth: { appId, privateKey }
@@ -66,6 +66,24 @@ const app = new App({
  * MIDDLEWARE * *
  * * * * * * * */
 
+/* _WEBHOOKS_ */
+app.webhooks.onAny(({ id, name, payload }) => {
+  console.log(name, "event received");
+});
+
+app.webhooks.onError((error) => {
+  if (error.name === "AggregateError") {
+    console.error(`Error processing request: ${error.event}`);
+  } else {
+    console.error(error);
+  }
+});
+
+/* _REST_ */
+// TODO: GET Installation ID
+// const I_ID = await app.octokit.request("GET /app/installations");
+// console.log(I_ID);
+
 // TODO: JWT for GH/Octokit
 // const { data } = await app.octokit.request("GET /app", {
 //   headers: {
@@ -73,15 +91,10 @@ const app = new App({
 //     "x-github-api-version": "2022-11-28"
 //   },
 // });
-// TODO: insert the header with the JWT and "x-github-api-version": "2022-11-28" inside THIS request() function signature
 
 // console.log("unformatted:", data);
 // console.log(JSON.stringify(data, null, 2));
 // console.log(util.inspect(data, { depth: null }));
-
-// app.webhooks.onAny(({ id, name, payload }) => {
-//   console.log(name, "event received");
-// });
 
 // TODO: Add a repo to the application watched repositories to GET backlog
 
@@ -98,11 +111,6 @@ const app = new App({
 //   repo: "docs",
 //   per_page: 2
 // });
-
-// TODO: GET Installation ID
-// const I_ID = await app.octokit.request("GET /app/installations");
-// console.log(I_ID);
-
 
 // TODO: this is an ex Octokit App constructor passing OAuth
 // const app = new App({
@@ -131,8 +139,8 @@ const port = process.env.PORT;
 const host = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
 const path = process.env.WEBHOOK_PATH;
 
-/* Condense_All_Server_Octokit_Instance_Middleware */
-const middleware = createNodeMiddleware(app);
+/* CONDENSE_ALL_SERVER_OCTOKIT_INSTANCE_MIDDLEWARE */
+const middleware = createNodeMiddleware(app.webhooks, { path });
 
 http
   .createServer(middleware)
