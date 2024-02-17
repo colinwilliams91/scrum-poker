@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import { Octokit, App } from "octokit";
 import { createNodeMiddleware } from "@octokit/webhooks";
 import { createAppAuth } from "@octokit/auth-app";
+import { Jwt } from "jsonwebtoken";
 import http from "http";
 import util from "util";
 import fs from "fs";
@@ -20,6 +21,14 @@ const privateKey = Buffer
 // TODO: Make a JWT (find a package for node)
 // [ex Ruby](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app#example-using-ruby-to-generate-a-jwt)
 
+const payload = {
+  iat: Math.floor(Date.now() / 1000) - 30,
+  exp: "7d",
+  iss: appId
+};
+
+const jwt = Jwt.sign(payload, privateKey, { algorithm: "RS256" });
+
 /* Octokit App Class */
 const app = new App({
   appId: appId,
@@ -31,6 +40,8 @@ const app = new App({
   },
 });
 
+// Octokit from SDK method for installation id
+// const octokit = await app.getInstallationOctokit("Iv1.e264e30f233d7489");
 
 
 // const appOctokit = new Octokit({
