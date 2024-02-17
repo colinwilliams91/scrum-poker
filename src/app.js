@@ -42,8 +42,8 @@ const jsonWebToken = jwt.sign(payload, privateKey, { algorithm: "RS256" });
 const app = new App({
   appId: appId,
   privateKey: privateKey,
-  authStrategy: createAppAuth,
-  auth: { appId, privateKey },
+  // authStrategy: createAppAuth,
+  // auth: { appId, privateKey },
   webhooks: {
     secret: webhookSecret
   },
@@ -67,8 +67,20 @@ const app = new App({
  * * * * * * * */
 
 /* _WEBHOOKS_ */
-app.webhooks.onAny(({ id, name, payload }) => {
+app.webhooks.onAny(async ({ id, name, payload }) => {
   console.log(name, "event received");
+  try {
+    const I_ID = await app.octokit.request("GET /app/installations", {
+      headers: {
+        "content-type": "application/json",
+        "authorization": `Bearer ${jsonWebToken}`,
+        "x-github-api-version": "2022-11-28"
+      }
+    });
+    console.log(I_ID);
+  } catch (error) {
+    console.error(error);
+  }
 });
 
 app.webhooks.onError((error) => {
