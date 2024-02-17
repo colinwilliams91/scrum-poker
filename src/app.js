@@ -9,17 +9,19 @@ import fs from "fs";
 
 dotenv.config();
 
+/* * * * * * * *
+ * ENV VARS * * *
+ * * * * * * * */
+
 const appId = process.env.APP_ID;
 const webhookSecret = process.env.WEBHOOK_SECRET;
 const privateKey = Buffer
   .from(process.env.PRIVATE_KEY, "base64")
   .toString("ascii");
 
+/* LOCAL_PVT_KEY_w/_NODE_FS_*/
 // const privateKeyPath = process.env.PRIVATE_KEY_PATH;
 // const privateKey = fs.readFileSync(privateKeyPath, "utf-8");
-
-// TODO: Make a JWT (find a package for node)
-// [ex Ruby](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app#example-using-ruby-to-generate-a-jwt)
 
 const payload = {
   iat: Math.floor(Date.now() / 1000) - 60,
@@ -29,7 +31,14 @@ const payload = {
 
 const jsonWebToken = jwt.sign(payload, privateKey, { algorithm: "RS256" });
 
-/* Octokit App Class */
+/* * * * * * * *
+ *_END_ENV_VARS_*
+ * * * * * * * */
+
+/* * * * * * * *
+ * OCTOKIT INIT *
+ * * * * * * * */
+
 const app = new App({
   appId: appId,
   privateKey: privateKey,
@@ -49,13 +58,26 @@ const app = new App({
 //   auth: { appId, privateKey }
 // });
 
+/* * * * * * * *
+ *_END_APP_INIT_*
+ * * * * * * * */
+
+/* * * * * * * *
+ * MIDDLEWARE * *
+ * * * * * * * */
+
 // TODO: JWT for GH/Octokit
-const { data } = await app.octokit.request("GET /app");
+// const { data } = await app.octokit.request("GET /app", {
+//   headers: {
+//     "authorization": `Bearer ${jsonWebToken}`,
+//     "x-github-api-version": "2022-11-28"
+//   },
+// });
 // TODO: insert the header with the JWT and "x-github-api-version": "2022-11-28" inside THIS request() function signature
 
-console.log("unformatted:", data);
-console.log(JSON.stringify(data, null, 2));
-console.log(util.inspect(data, { depth: null }));
+// console.log("unformatted:", data);
+// console.log(JSON.stringify(data, null, 2));
+// console.log(util.inspect(data, { depth: null }));
 
 // app.webhooks.onAny(({ id, name, payload }) => {
 //   console.log(name, "event received");
@@ -95,13 +117,21 @@ console.log(util.inspect(data, { depth: null }));
 //   },
 // });
 
+/* * * * * * * * *
+ *_END_MIDDLEWARE_*
+ * * * * * * * * */
 
-/* Server Setup */
+
+/* * * * * * * *
+ * SERVER INIT * *
+ * * * * * * * */
+
+/* SERVER_VARS */
 const port = process.env.PORT;
 const host = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
 const path = process.env.WEBHOOK_PATH;
 
-/* Condense All Server Octokit Instance Middleware */
+/* Condense_All_Server_Octokit_Instance_Middleware */
 const middleware = createNodeMiddleware(app);
 
 http
