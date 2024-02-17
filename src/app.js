@@ -31,6 +31,8 @@ const app = new App({
   },
 });
 
+
+
 // const appOctokit = new Octokit({
 //   authStrategy: createAppAuth,
 //   auth: { appId, privateKey }
@@ -62,6 +64,10 @@ const app = new App({
 //   repo: "docs",
 //   per_page: 2
 // });
+
+// TODO: GET Installation ID
+// const I_ID = await app.octokit.request("GET /app/installations");
+// console.log(I_ID);
 
 
 // TODO: this is an ex Octokit App constructor passing OAuth
