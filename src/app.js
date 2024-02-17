@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import { Octokit, App } from "octokit";
 import { createNodeMiddleware } from "@octokit/webhooks";
 import { createAppAuth } from "@octokit/auth-app";
-import { Jwt } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import http from "http";
 import util from "util";
 import fs from "fs";
@@ -22,12 +22,12 @@ const privateKey = Buffer
 // [ex Ruby](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app#example-using-ruby-to-generate-a-jwt)
 
 const payload = {
-  iat: Math.floor(Date.now() / 1000) - 30,
-  exp: "7d",
+  iat: Math.floor(Date.now() / 1000) - 60,
+  exp: Date.now() + (7 * 24 * 60 * 60 * 1000),
   iss: appId
 };
 
-const jwt = Jwt.sign(payload, privateKey, { algorithm: "RS256" });
+const jsonWebToken = jwt.sign(payload, privateKey, { algorithm: "RS256" });
 
 /* Octokit App Class */
 const app = new App({
@@ -50,11 +50,12 @@ const app = new App({
 // });
 
 // TODO: JWT for GH/Octokit
-// const { data } = await app.octokit.request("/app");
+const { data } = await app.octokit.request("GET /app");
+// TODO: insert the header with the JWT and "x-github-api-version": "2022-11-28" inside THIS request() function signature
 
-// console.log("unformatted:", data);
-// console.log(JSON.stringify(data, null, 2));
-// console.log(util.inspect(data, { depth: null }));
+console.log("unformatted:", data);
+console.log(JSON.stringify(data, null, 2));
+console.log(util.inspect(data, { depth: null }));
 
 // app.webhooks.onAny(({ id, name, payload }) => {
 //   console.log(name, "event received");
