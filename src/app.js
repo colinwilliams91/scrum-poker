@@ -14,6 +14,7 @@ dotenv.config();
  * * * * * * * */
 
 const appId = process.env.APP_ID;
+const installationId = process.env.INSTALLATION_ID;
 const webhookSecret = process.env.WEBHOOK_SECRET;
 const privateKey = Buffer
   .from(process.env.PRIVATE_KEY, "base64")
@@ -30,6 +31,13 @@ const payload = {
 };
 
 const jsonWebToken = jwt.sign(payload, privateKey, { algorithm: "RS256" });
+
+const install_id = await fetch("https://api.github.com/installation/repositories", {
+  "accept": "application/vnd.github+json",
+  "authorization": `bearer ${jsonWebToken}`,
+  "x-github-api-version": "2022-11-28"
+});
+console.log("MOTHER FUCKER", install_id);
 
 /* * * * * * * *
  *_END_ENV_VARS_*
@@ -48,9 +56,13 @@ const app = new App({
     secret: webhookSecret
   },
 });
+// console.log(app);
+
+
 
 /* _OCTOKIT_FROM_SDK_METHOD_FOR_INSTALLATION_ID_*/
-// const octokit = await app.getInstallationOctokit("Iv1.e264e30f233d7489");
+const octokit = await app.getInstallationOctokit(installationId);
+console.log(octokit);
 
 /* _APP_OCTOKIT_AUTH_INIT_NO_JWT_ */
 // const appOctokit = new Octokit({
@@ -79,7 +91,7 @@ app.webhooks.onAny(async ({ id, name, payload }) => {
     });
     console.log(I_ID);
   } catch (error) {
-    console.error(error);
+    console.error("CAUGHT ON TRY CATCH WEBHOOK ON SERVER:", error);
   }
 });
 
@@ -87,7 +99,7 @@ app.webhooks.onError((error) => {
   if (error.name === "AggregateError") {
     console.error(`Error processing request: ${error.event}`);
   } else {
-    console.error(error);
+    console.error("WEBHOOKS ON ERROR ON SERVER:", error);
   }
 });
 
