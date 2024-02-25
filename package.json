@@ -5,6 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "build": "tsc",
     "server": "node --watch ./src/app.js"
   },
   "keywords": [],
@@ -16,6 +17,7 @@
     "octokit": "^3.1.2"
   },
   "devDependencies": {
-    "smee-client": "^2.0.1"
+    "smee-client": "^2.0.1",
+    "typescript": "^5.3.3"
   }
 }
