@@ -3,7 +3,7 @@
 # This will clear the node_modules cached packages and reinstall for Unix/Bash/ZSH
 # Run from root
 
-SCRIPT="./scripts/bash-package-clear.sh"
+SCRIPT="./scripts/bash-packages-clear.sh"
 
 if ! [[ -x "$SCRIPT" ]]; then
     echo "First time running script..."

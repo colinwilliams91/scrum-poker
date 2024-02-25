@@ -7,7 +7,7 @@ if ((Get-ExecutionPolicy) -eq "Restricted") {
   Write-Host "We will now bypass the execution policy for this script."
 
   # Bypass the execution policy for this session and execute the script
-  & powershell.exe -ExecutionPolicy Bypass -File .\scripts\package-clear.ps1
+  & powershell.exe -ExecutionPolicy Bypass -File .\scripts\packages-clear.ps1
 }
 
 Remove-Item -Recurse -Force .\node_modules\
