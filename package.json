@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "server": "node --watch ./src/app.js"
+    "server": "node --watch ./src/app.ts"
   },
   "keywords": [],
   "author": "",
