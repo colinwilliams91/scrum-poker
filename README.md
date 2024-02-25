@@ -16,7 +16,16 @@ npm i
 
 ### To Develop:
 - In root of `scrum-poker`
-  - Next, compile TypeScript files to JavaScript files in `./dist` so that Node can run
+- Make sure your branch is up to date:
+  - This will fetch current remote main and merge into your feature-branch
+```sh
+git pull origin main
+```
+- Install packages if needed:
+```sh
+npm i
+```
+- Next, compile TypeScript files to JavaScript files in `./dist` so that Node can run
 ```sh
 npm run build
 ```
