@@ -1,200 +1,86 @@
+// You installed the `dotenv` and `octokit` modules earlier. The `@octokit/webhooks` is a dependency of the `octokit` module, so you don't need to install it separately. The `fs` and `http` dependencies are built-in Node.js modules.
 import dotenv from "dotenv";
-import { Octokit, App } from "octokit";
-import { request } from "@octokit/request";
-import { createNodeMiddleware } from "@octokit/webhooks";
-import { createAppAuth } from "@octokit/auth-app";
-import jwt from "jsonwebtoken";
-import http from "http";
-import util from "util";
+import {App} from "octokit";
+import {createNodeMiddleware} from "@octokit/webhooks";
 import fs from "fs";
+import http from "http";
 
+// This reads your `.env` file and adds the variables from that file to the `process.env` object in Node.js.
 dotenv.config();
 
-/* * * * * * * *
- * ENV VARS * * *
- * * * * * * * */
-
+// This assigns the values of your environment variables to local variables.
 const appId = process.env.APP_ID;
 const installationId = process.env.INSTALLATION_ID;
 const webhookSecret = process.env.WEBHOOK_SECRET;
-// const privateKey = Buffer
-//   .from(process.env.PRIVATE_KEY, "base64")
-//   .toString("ascii");
 
-/* LOCAL_PVT_KEY_w/_NODE_FS_*/
 const privateKeyPath = process.env.PRIVATE_KEY_PATH;
 const privateKey = fs.readFileSync(privateKeyPath, "utf-8");
 
-const payload = {
-  iat: Math.floor(Date.now() / 1000) - 60,
-  exp: Date.now() + (7 * 24 * 60 * 60 * 1000),
-  iss: appId
-};
-
-const jsonWebToken = jwt.sign(payload, privateKey, { algorithm: "RS256" });
-
-// const install_id = await fetch("https://api.github.com/installation/repositories", {
-//   "accept": "application/vnd.github+json",
-//   "authorization": `bearer ${jsonWebToken}`,
-//   "x-github-api-version": "2022-11-28"
-// });
-// console.log("MOTHER FUCKER", install_id);
-
-/* * * * * * * *
- *_END_ENV_VARS_*
- * * * * * * * */
-
-/* * * * * * * *
- * OCTOKIT INIT *
- * * * * * * * */
-
+// This creates a new instance of the Octokit App class.
 const app = new App({
   appId: appId,
   privateKey: privateKey,
-  // authStrategy: createAppAuth,
-  // auth: { appId, privateKey },
   webhooks: {
     secret: webhookSecret
   },
 });
-console.log(app);
 
+// This defines the message that your app will post to pull requests.
+const messageForNewPRs = "Thanks for opening a new PR! Please follow our contributing guidelines to make your PR easier to review.";
 
+// This adds an event handler that your code will call later. When this event handler is called, it will log the event to the console. Then, it will use GitHub's REST API to add a comment to the pull request that triggered the event.
+async function handlePullRequestOpened({octokit, payload}) {
+  console.log(`Received a pull request event for #${payload.pull_request.number}`);
 
-/* _OCTOKIT_FROM_SDK_METHOD_FOR_INSTALLATION_ID_*/
-// const { data: slug } = await app.octokit.rest.apps.getAuthenticated();
-// const octokit = await app.getInstallationOctokit(installationId);
-// console.log(octokit);
-// console.log("SLUG:", slug);
+  try {
+    await octokit.request("POST /repos/{owner}/{repo}/issues/{issue_number}/comments", {
+      owner: payload.repository.owner.login,
+      repo: payload.repository.name,
+      issue_number: payload.pull_request.number,
+      body: messageForNewPRs,
+      headers: {
+        "x-github-api-version": "2022-11-28",
+      },
+    });
+  } catch (error) {
+    if (error.response) {
+      console.error(`Error! Status: ${error.response.status}. Message: ${error.response.data.message}`)
+    }
+    console.error(error)
+  }
+};
 
-/* _APP_OCTOKIT_AUTH_INIT_NO_JWT_ */
-// const appOctokit = new Octokit({
-//   authStrategy: createAppAuth,
-//   auth: { appId, privateKey, installationId }
-// });
+// This sets up a webhook event listener. When your app receives a webhook event from GitHub with a `X-GitHub-Event` header value of `pull_request` and an `action` payload value of `opened`, it calls the `handlePullRequestOpened` event handler that is defined above.
+app.webhooks.on("pull_request.opened", handlePullRequestOpened);
 
-const auth = createAppAuth({
-  appId,
-  privateKey,
-  installationId
-});
-
-// const appOctokit = new Octokit({
-//   authStrategy: createAppAuth,
-//   auth: { appId, privateKey, installationId }
-// });
-
-const requestWithAuth = request.defaults({
-  request: {
-    hook: auth.hook
+// This logs any errors that occur.
+app.webhooks.onError((error) => {
+  if (error.name === "AggregateError") {
+    console.error(`Error processing request: ${error.event}`);
+  } else {
+    console.error(error);
   }
 });
 
-// const { data: slug } = await appOctokit.rest.apps.getAuthenticated();
-// console.log("SLUG:", slug);
+// This determines where your server will listen.
+//
+// For local development, your server will listen to port 3000 on `localhost`. When you deploy your app, you will change these values. For more information, see "[Deploy your app](#deploy-your-app)."
+const port = 3000;
+const host = 'localhost';
+const path = "/api/webhook";
+const localWebhookUrl = `http://${host}:${port}${path}`;
 
-/* * * * * * * *
- *_END_APP_INIT_*
- * * * * * * * */
+// This sets up a middleware function to handle incoming webhook events.
+//
+// Octokit's `createNodeMiddleware` function takes care of generating this middleware function for you. The resulting middleware function will:
+//
+//    - Check the signature of the incoming webhook event to make sure that it matches your webhook secret. This verifies that the incoming webhook event is a valid GitHub event.
+//    - Parse the webhook event payload and identify the type of event.
+//    - Trigger the corresponding webhook event handler.
+const middleware = createNodeMiddleware(app.webhooks, {path});
 
-/* * * * * * * *
- * MIDDLEWARE * *
- * * * * * * * */
-
-/* _WEBHOOKS_ */
-// app.webhooks.onAny(async ({ id, name, payload }) => {
-//   console.log(name, "event received");
-//   try {
-//     const I_ID = await app.octokit.request("GET /app/installations", {
-//       headers: {
-//         "content-type": "application/json",
-//         "authorization": `Bearer ${jsonWebToken}`,
-//         "x-github-api-version": "2022-11-28"
-//       }
-//     });
-//     console.log(I_ID);
-//   } catch (error) {
-//     console.error("CAUGHT ON TRY CATCH WEBHOOK ON SERVER:", error);
-//   }
-// });
-
-// app.webhooks.onError((error) => {
-//   if (error.name === "AggregateError") {
-//     console.error(`Error processing request: ${error.event}`);
-//   } else {
-//     console.error("WEBHOOKS ON ERROR ON SERVER:", error);
-//   }
-// });
-
-/* _REST_ */
-// TODO: GET Installation ID
-// const I_ID = await app.octokit.request("GET /app/installations");
-// console.log(I_ID);
-
-const I_ID = await requestWithAuth("GET /app/installations");
-console.log(I_ID);
-
-// TODO: JWT for GH/Octokit
-// const { data } = await app.octokit.request("GET /app", {
-//   headers: {
-//     "authorization": `Bearer ${jsonWebToken}`,
-//     "x-github-api-version": "2022-11-28"
-//   },
-// });
-
-// console.log("unformatted:", data);
-// console.log(JSON.stringify(data, null, 2));
-// console.log(util.inspect(data, { depth: null }));
-
-// TODO: Add a repo to the application watched repositories to GET backlog
-
-// app.oauth.on("token", async ({ token, octokit }) => {
-//   // TODO: this octokit.authenticate should be in the parent scope so it is more available
-//   octokit.authenticate({ type: 'token', token: installation.data.token })
-//   const { data } = await octokit.request("GET /user");
-//   console.log(`Token retrieved for ${data.login}`);
-// });
-
-// TODO: test GET backlog from specific repository
-// await octokit.request("GET /repos/{owner}/{repo}/issues", {
-//   owner: "github",
-//   repo: "docs",
-//   per_page: 2
-// });
-
-// TODO: this is an ex Octokit App constructor passing OAuth
-// const app = new App({
-//   appId: 123,
-//   privateKey: "-----BEGIN PRIVATE KEY-----\n...",
-//   oauth: {
-//     clientId: "0123",
-//     clientSecret: "0123secret",
-//   },
-//   webhooks: {
-//     secret: "secret",
-//   },
-// });
-
-/* * * * * * * * *
- *_END_MIDDLEWARE_*
- * * * * * * * * */
-
-
-/* * * * * * * *
- * SERVER INIT * *
- * * * * * * * */
-
-/* SERVER_VARS */
-const port = process.env.PORT;
-const host = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
-const path = process.env.WEBHOOK_PATH;
-
-/* CONDENSE_ALL_SERVER_OCTOKIT_INSTANCE_MIDDLEWARE */
-const middleware = createNodeMiddleware(app.webhooks, { path });
-
-http
-  .createServer(middleware)
-  .listen(port, () => {
-    console.log(`Server is listening for events at: ${host}:${port}`);
-    console.log("Press Ctrl + C to quit.");
-  });
+// This creates a Node.js server that listens for incoming HTTP requests (including webhook payloads from GitHub) on the specified port. When the server receives a request, it executes the `middleware` function that you defined earlier. Once the server is running, it logs messages to the console to indicate that it is listening.
+http.createServer(middleware).listen(port, () => {
+  console.log(`Server is listening for events at: ${localWebhookUrl}`);
+  console.log('Press Ctrl + C to quit.')
+});
