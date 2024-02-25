@@ -48,16 +48,16 @@ const jsonWebToken = jwt.sign(payload, privateKey, { algorithm: "RS256" });
  * OCTOKIT INIT *
  * * * * * * * */
 
-// const app = new App({
-//   appId: appId,
-//   privateKey: privateKey,
-//   // authStrategy: createAppAuth,
-//   // auth: { appId, privateKey },
-//   webhooks: {
-//     secret: webhookSecret
-//   },
-// });
-// console.log(app);
+const app = new App({
+  appId: appId,
+  privateKey: privateKey,
+  // authStrategy: createAppAuth,
+  // auth: { appId, privateKey },
+  webhooks: {
+    secret: webhookSecret
+  },
+});
+console.log(app);
 
 
 
