@@ -6,7 +6,7 @@
 
 ## Op-Specs
 
-### To Install:
+### First Time:
 - In your terminal:
 ```sh
 git clone https://github.com/colinwilliams91/scrum-poker.git
@@ -14,9 +14,9 @@ cd scrum-poker
 npm i
 ```
 
-### To Develop
+### To Develop:
 - In root of `scrum-poker`
-  - First, compile TypeScript files to JavaScript files in `./dist` so that Node can run
+  - Next, compile TypeScript files to JavaScript files in `./dist` so that Node can run
 ```sh
 npm run build
 ```
@@ -41,7 +41,25 @@ npm run server
 - Navigate to [https://smee.io/hcbsiedRHAM0Aka3](https://smee.io/hcbsiedRHAM0Aka3) in your web browser
 - You should now see the JSON Payload for the event you are testing with all information from GH Rest API
 
+### Clear Caches:
+- If you have deleted or renamed any files:
+  - This will delete old `dist` and re-compile with up-to-date `.ts` files...
+```sh
+# If Powershell Terminal, from root
+.\scripts\build-clear.ps1
 
+# If Bash/ZSH Terminal, from root
+./scripts/bash-build-clear.sh
+```
+- If you want to clean out `node_modules` and reinstall them:
+  - This is good if you get a blinking terminal, or a good first step in debugging weird issues in general...
+```sh
+# If Powershell Terminal, from root
+.\scripts\packages-clear.ps1
+
+# If Bash/ZSH Terminal, from root
+./scripts/bash-packages-clear.sh
+```
 
 ## Notes:
 
