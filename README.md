@@ -18,6 +18,16 @@ This is an application that integrates with GitHub Projects for seamless import 
 - Validation Failed error: response body will include a `code` which correlate to the table in below documentation:
   - [Docs](https://docs.github.com/en/rest/using-the-rest-api/troubleshooting-the-rest-api?apiVersion=2022-11-28#validation-failed)
 
+## TypeScript
+- Using module `"Module": "NodeNext"` requires `.js` file extension for imports local to project.
+- This is _not_ the case when importing from `node_modules`:
+```
+import { hey } from "./helper.js"
+
+import { read } from "fs";
+```
+
+
 ## Deploying
 - [Update the webhook URL](https://docs.github.com/en/apps/creating-github-apps/writing-code-for-a-github-app/building-a-github-app-that-responds-to-webhook-events#update-the-webhook-url)
   - Once you have a server that is set up to receive webhook traffic from GitHub, update the webhook URL in your app settings. You should not use Smee.io to forward your webhooks in production.
