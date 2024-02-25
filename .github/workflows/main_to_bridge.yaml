@@ -1,0 +1,31 @@
+name: Auto Sync bridge-branch with main
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync-with-main:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      # this ensures all histories are fetched for runner, avoiding `unrelated histories` merge error
+      with:
+        fetch-depth: 0
+
+    - name: Merge changes into sprite-branch
+      # GH actions/checkout requires git identity to be configured for security, top two commands handle that
+      run: |
+        git config user.name "${{ github.actor }}"
+        git config user.email "${{ github.actor }}@users.noreply.github.com"
+        git config pull.rebase false
+
+        git fetch origin
+        git checkout unity-assets
+        git pull origin main
+        git merge --no-ff -m "auto sync main changes to unity-assets bridge branch" main
+
+        git push origin unity-assets

@@ -1,0 +1,28 @@
+name: Auto Merge Bridge Branch to Main
+
+on:
+  push:
+    branches:
+      - unity-assets
+
+jobs:
+  merge-to-main:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      # this ensures all histories are fetched for runner, avoiding `unrelated histories` merge error
+      with:
+        fetch-depth: 0
+
+    - name: Merge to main
+      # GH actions/checkout requires git identity to be configured for security, top two commands handle that
+      run: |
+        git config user.name "${{ github.actor }}"
+        git config user.email "${{ github.actor }}@users.noreply.github.com"
+
+        git fetch origin
+        git checkout main
+        git merge --no-ff -m "auto merge unity-assets bridge changes to main" ${{ github.ref }}
+        git push origin main
