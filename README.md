@@ -6,8 +6,24 @@
 
 ## Op-Specs
 
-### To Start:
+### To Install:
+- In your terminal:
+```sh
+git clone https://github.com/colinwilliams91/scrum-poker.git
+cd scrum-poker
+npm i
+```
 
+### To Develop
+- In root of `scrum-poker`
+  - First, compile TypeScript files to JavaScript files in `./dist` so that Node can run
+```sh
+npm run build
+```
+- Kick off the Node server:
+```sh
+npm run server
+```
 
 ### To Test:
 - Inside your IDE (scrum-poker project)
