@@ -10,6 +10,10 @@ if ((Get-ExecutionPolicy) -eq "Restricted") {
   & powershell.exe -ExecutionPolicy Bypass -File .\scripts\build-clear.ps1
 }
 
-Remove-Item -r -fo dist/
+# Check if the 'dist' directory exists
+if (Test-Path dist -PathType Container) {
+  # 'dist' directory exists, remove it
+  Remove-Item -Recurse -Force dist/
+}
 
 npm run build

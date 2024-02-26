@@ -12,6 +12,10 @@ if ! [[ -x "$SCRIPT" ]]; then
     chmod +x "$SCRIPT"
 fi
 
-rm -rf ./dist
+# Check if the 'dist' directory exists
+if [ -d "dist" ]; then
+    # 'dist' directory exists, remove it
+    rm -rf dist/
+fi
 
 npm run build
