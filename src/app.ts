@@ -1,7 +1,7 @@
 // You installed the `dotenv` and `octokit` modules earlier. The `@octokit/webhooks` is a dependency of the `octokit` module, so you don't need to install it separately. The `fs` and `http` dependencies are built-in Node.js modules.
 import dotenv from "dotenv";
-import {App} from "octokit";
-import {createNodeMiddleware} from "@octokit/webhooks";
+import { App } from "octokit";
+import { createNodeMiddleware } from "@octokit/webhooks";
 import fs from "fs";
 import http from "http";
 
@@ -13,8 +13,12 @@ const appId = process.env.APP_ID;
 const installationId = process.env.INSTALLATION_ID;
 const webhookSecret = process.env.WEBHOOK_SECRET;
 
-const privateKeyPath = process.env.PRIVATE_KEY_PATH;
-const privateKey = fs.readFileSync(privateKeyPath, "utf-8");
+// const privateKeyPath = process.env.PRIVATE_KEY_PATH;
+// const privateKey = fs.readFileSync(privateKeyPath, "utf-8");
+
+const privateKey = Buffer
+  .from(process.env.PRIVATE_KEY, "base64")
+  .toString("ascii");
 
 // This creates a new instance of the Octokit App class.
 const app = new App({
@@ -52,6 +56,19 @@ async function handlePullRequestOpened({octokit, payload}) {
 
 // This sets up a webhook event listener. When your app receives a webhook event from GitHub with a `X-GitHub-Event` header value of `pull_request` and an `action` payload value of `opened`, it calls the `handlePullRequestOpened` event handler that is defined above.
 app.webhooks.on("pull_request.opened", handlePullRequestOpened);
+
+app.webhooks.on("issues.opened", ({ octokit, payload }) => {
+  console.log("ISSUE OPENED:", payload);
+  const { owner, repo, issue } = payload;
+  const issueNumber = issue.number;
+
+  return octokit.rest.issues.createComment({
+    owner: payload.repository.owner.login,
+    repo: payload.repository.name,
+    issue_number: issueNumber,
+    body: "Hello, World!",
+  });
+});
 
 // This logs any errors that occur.
 app.webhooks.onError((error) => {
